@@ -10,12 +10,17 @@ RUN apt-get install -y \
     curl \
     debhelper \
     dh-python \
+    dpdk-dev \
     dpkg-dev \
     iputils-ping \
+    libdpdk-dev \
     libelf-dev \
+    libmbedtls-dev \
     libnuma-dev \
     libpcap-dev \
+    libsrtp2-dev \
     libssl-dev \
+    libsubunit-dev \
     m4 \
     nasm \
     ninja-build \
