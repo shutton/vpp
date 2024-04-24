@@ -16,7 +16,7 @@
 #include <vnet/vnet.h>
 #include <vnet/plugin/plugin.h>
 #include <vpp/app/version.h>
-#include <vnet/crypto/crypto.h>
+#include <plugins/crypto/crypto.h>
 
 #include <wireguard/wireguard_send.h>
 #include <wireguard/wireguard_key.h>
@@ -46,6 +46,7 @@ wireguard_register_post_node (vlib_main_t *vm)
   eit = &wg_encrypt_async_next;
   dit = &wg_decrypt_async_next;
 
+  vnet_crypto_register_post_node_f vnet_crypto_register_post_node = vlib_get_plugin_symbol ("crypto_plugin.so", "vnet_crypto_register_post_node");
   eit->wg4_post_next =
     vnet_crypto_register_post_node (vm, "wg4-output-tun-post-node");
   eit->wg6_post_next =

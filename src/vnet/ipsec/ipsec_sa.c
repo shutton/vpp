@@ -14,13 +14,14 @@
  */
 
 #include <sys/random.h>
-#include <vnet/ipsec/ipsec.h>
-#include <vnet/ipsec/esp.h>
-#include <vnet/udp/udp_local.h>
-#include <vnet/fib/fib_table.h>
+#include <vlib/unix/plugin.h>
 #include <vnet/fib/fib_entry_track.h>
-#include <vnet/ipsec/ipsec_tun.h>
+#include <vnet/fib/fib_table.h>
+#include <vnet/ipsec/esp.h>
 #include <vnet/ipsec/ipsec.api_enum.h>
+#include <vnet/ipsec/ipsec.h>
+#include <vnet/ipsec/ipsec_tun.h>
+#include <vnet/udp/udp_local.h>
 
 /**
  * @brief
@@ -383,6 +384,7 @@ ipsec_sa_add_and_lock (u32 id, u32 spi, ipsec_protocol_t proto,
 
   clib_memcpy (&sa->crypto_key, ck, sizeof (sa->crypto_key));
 
+  vnet_crypto_key_add_f vnet_crypto_key_add = vlib_get_plugin_symbol("crypto_plugin.so", "vnet_crypto_key_add");
   sa->crypto_sync_key_index = vnet_crypto_key_add (
     vm, im->crypto_algs[crypto_alg].alg, (u8 *) ck->data, ck->len);
   if (~0 == sa->crypto_sync_key_index)
@@ -401,6 +403,9 @@ ipsec_sa_add_and_lock (u32 id, u32 spi, ipsec_protocol_t proto,
 	  return VNET_API_ERROR_KEY_LENGTH;
 	}
     }
+
+  u32 (*vnet_crypto_key_add_linked)(vlib_main_t *, vnet_crypto_key_index_t, vnet_crypto_key_index_t) = NULL;
+  vnet_crypto_key_add_linked = vlib_get_plugin_symbol ("crypto", "vnet_crypto_key_add_linked");
 
   if (sa->crypto_async_enc_op_id && !ipsec_sa_is_set_IS_AEAD (sa))
     sa->crypto_async_key_index =
@@ -524,10 +529,12 @@ ipsec_sa_del (ipsec_sa_t * sa)
   /* no recovery possible when deleting an SA */
   (void) ipsec_call_add_del_callbacks (im, sa, sa_index, 0);
 
+  void (*vnet_crypto_key_del)(vlib_main_t *, vnet_crypto_key_index_t) = vlib_get_plugin_symbol ("crypto_plugin.so", "vnet_crypto_key_del");
   if (ipsec_sa_is_set_IS_ASYNC (sa))
     {
-      if (!ipsec_sa_is_set_IS_AEAD (sa))
-	vnet_crypto_key_del (vm, sa->crypto_async_key_index);
+      if (!ipsec_sa_is_set_IS_AEAD (sa)) {
+        vnet_crypto_key_del (vm, sa->crypto_async_key_index);
+      }
     }
 
   if (ipsec_sa_is_set_UDP_ENCAP (sa) && ipsec_sa_is_set_IS_INBOUND (sa))

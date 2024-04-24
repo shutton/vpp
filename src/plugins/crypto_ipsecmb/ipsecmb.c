@@ -22,7 +22,6 @@
 #include <vnet/vnet.h>
 #include <vnet/plugin/plugin.h>
 #include <vpp/app/version.h>
-#include <vnet/crypto/crypto.h>
 #include <vppinfra/cpu.h>
 
 #define HMAC_MAX_BLOCK_SIZE  IMB_SHA_512_BLOCK_SIZE
@@ -60,7 +59,7 @@ typedef struct
   u8 dec_key_exp[EXPANDED_KEY_N_BYTES];
 } ipsecmb_aes_key_data_t;
 
-static ipsecmb_main_t ipsecmb_main = { };
+static ipsecmb_main_t ipsecmb_main = {};
 
 /* clang-format off */
 /*
@@ -361,7 +360,7 @@ ipsecmb_ops_aes_cipher_inline (vlib_main_t *vm, vnet_crypto_op_t *ops[],
       job->cipher_direction = direction;
       job->chain_order =
 	(direction == IMB_DIR_ENCRYPT ? IMB_ORDER_CIPHER_HASH :
-					      IMB_ORDER_HASH_CIPHER);
+					IMB_ORDER_HASH_CIPHER);
 
       job->aes_key_len_in_bytes = key_len / 8;
       job->enc_keys = kd->enc_key_exp;
@@ -762,7 +761,7 @@ ipsec_mb_ops_chacha_poly_dec_chained (vlib_main_t *vm, vnet_crypto_op_t *ops[],
 #endif
 
 static void
-crypto_ipsecmb_key_handler (vlib_main_t * vm, vnet_crypto_key_op_t kop,
+crypto_ipsecmb_key_handler (vlib_main_t *vm, vnet_crypto_key_op_t kop,
 			    vnet_crypto_key_index_t idx)
 {
   ipsecmb_main_t *imbm = &ipsecmb_main;
@@ -798,8 +797,8 @@ crypto_ipsecmb_key_handler (vlib_main_t * vm, vnet_crypto_key_op_t kop,
       clib_mem_free_s (imbm->key_data[idx]);
     }
 
-  kd = imbm->key_data[idx] = clib_mem_alloc_aligned (ad->data_size,
-						     CLIB_CACHE_LINE_BYTES);
+  kd = imbm->key_data[idx] =
+    clib_mem_alloc_aligned (ad->data_size, CLIB_CACHE_LINE_BYTES);
 
   /* AES CBC key expansion */
   if (ad->keyexp)
@@ -841,7 +840,7 @@ crypto_ipsecmb_key_handler (vlib_main_t * vm, vnet_crypto_key_op_t kop,
 }
 
 static clib_error_t *
-crypto_ipsecmb_init (vlib_main_t * vm)
+crypto_ipsecmb_init (vlib_main_t *vm)
 {
   ipsecmb_main_t *imbm = &ipsecmb_main;
   ipsecmb_alg_data_t *ad;
@@ -866,30 +865,30 @@ crypto_ipsecmb_init (vlib_main_t * vm)
 
   vec_foreach (ptd, imbm->per_thread_data)
     {
-	ptd->mgr = alloc_mb_mgr (0);
+      ptd->mgr = alloc_mb_mgr (0);
 #if IMB_VERSION_NUM >= IMB_VERSION(1, 3, 0)
-	clib_memset_u8 (ptd->burst_jobs, 0,
-			sizeof (IMB_JOB) * IMB_MAX_BURST_SIZE);
+      clib_memset_u8 (ptd->burst_jobs, 0,
+		      sizeof (IMB_JOB) * IMB_MAX_BURST_SIZE);
 #endif
-	if (clib_cpu_supports_avx512f ())
-	  init_mb_mgr_avx512 (ptd->mgr);
-	else if (clib_cpu_supports_avx2 () && clib_cpu_supports_bmi2 ())
-	  init_mb_mgr_avx2 (ptd->mgr);
-	else
-	  init_mb_mgr_sse (ptd->mgr);
+      if (clib_cpu_supports_avx512f ())
+	init_mb_mgr_avx512 (ptd->mgr);
+      else if (clib_cpu_supports_avx2 () && clib_cpu_supports_bmi2 ())
+	init_mb_mgr_avx2 (ptd->mgr);
+      else
+	init_mb_mgr_sse (ptd->mgr);
 
-	if (ptd == imbm->per_thread_data)
-	  m = ptd->mgr;
+      if (ptd == imbm->per_thread_data)
+	m = ptd->mgr;
     }
 
-#define _(a, b, c, d, e, f)                                              \
-  vnet_crypto_register_ops_handler (vm, eidx, VNET_CRYPTO_OP_##a##_HMAC, \
-                                    ipsecmb_ops_hmac_##a);               \
-  ad = imbm->alg_data + VNET_CRYPTO_ALG_HMAC_##a;                        \
-  ad->block_size = d;                                                    \
-  ad->data_size = e * 2;                                                 \
-  ad->hash_one_block = m-> c##_one_block;                                \
-  ad->hash_fn = m-> c;                                                   \
+#define _(a, b, c, d, e, f)                                                   \
+  vnet_crypto_register_ops_handler (vm, eidx, VNET_CRYPTO_OP_##a##_HMAC,      \
+				    ipsecmb_ops_hmac_##a);                    \
+  ad = imbm->alg_data + VNET_CRYPTO_ALG_HMAC_##a;                             \
+  ad->block_size = d;                                                         \
+  ad->data_size = e * 2;                                                      \
+  ad->hash_one_block = m->c##_one_block;                                      \
+  ad->hash_fn = m->c;
 
   foreach_ipsecmb_hmac_op;
 #undef _
@@ -904,20 +903,20 @@ crypto_ipsecmb_init (vlib_main_t * vm)
 
   foreach_ipsecmb_cipher_op;
 #undef _
-#define _(a, b)                                                         \
-  vnet_crypto_register_ops_handler (vm, eidx, VNET_CRYPTO_OP_##a##_ENC, \
-                                    ipsecmb_ops_gcm_cipher_enc_##a);    \
-  vnet_crypto_register_ops_handler (vm, eidx, VNET_CRYPTO_OP_##a##_DEC, \
-                                    ipsecmb_ops_gcm_cipher_dec_##a);    \
-  vnet_crypto_register_chained_ops_handler                              \
-      (vm, eidx, VNET_CRYPTO_OP_##a##_ENC,                              \
-       ipsecmb_ops_gcm_cipher_enc_##a##_chained);                       \
-  vnet_crypto_register_chained_ops_handler                              \
-      (vm, eidx, VNET_CRYPTO_OP_##a##_DEC,                              \
-       ipsecmb_ops_gcm_cipher_dec_##a##_chained);                       \
-  ad = imbm->alg_data + VNET_CRYPTO_ALG_##a;                            \
-  ad->data_size = sizeof (struct gcm_key_data);                         \
-  ad->aes_gcm_pre = m->gcm##b##_pre;                                    \
+#define _(a, b)                                                               \
+  vnet_crypto_register_ops_handler (vm, eidx, VNET_CRYPTO_OP_##a##_ENC,       \
+				    ipsecmb_ops_gcm_cipher_enc_##a);          \
+  vnet_crypto_register_ops_handler (vm, eidx, VNET_CRYPTO_OP_##a##_DEC,       \
+				    ipsecmb_ops_gcm_cipher_dec_##a);          \
+  vnet_crypto_register_chained_ops_handler (                                  \
+    vm, eidx, VNET_CRYPTO_OP_##a##_ENC,                                       \
+    ipsecmb_ops_gcm_cipher_enc_##a##_chained);                                \
+  vnet_crypto_register_chained_ops_handler (                                  \
+    vm, eidx, VNET_CRYPTO_OP_##a##_DEC,                                       \
+    ipsecmb_ops_gcm_cipher_dec_##a##_chained);                                \
+  ad = imbm->alg_data + VNET_CRYPTO_ALG_##a;                                  \
+  ad->data_size = sizeof (struct gcm_key_data);                               \
+  ad->aes_gcm_pre = m->gcm##b##_pre;
 
   foreach_ipsecmb_gcm_cipher_op;
 #undef _
@@ -943,13 +942,11 @@ crypto_ipsecmb_init (vlib_main_t * vm)
   return (NULL);
 }
 
-VLIB_INIT_FUNCTION (crypto_ipsecmb_init) =
-{
+VLIB_INIT_FUNCTION (crypto_ipsecmb_init) = {
   .runs_after = VLIB_INITS ("vnet_crypto_init"),
 };
 
-VLIB_PLUGIN_REGISTER () =
-{
+VLIB_PLUGIN_REGISTER () = {
   .version = VPP_BUILD_VER,
   .description = "Intel IPSEC Multi-buffer Crypto Engine",
 };

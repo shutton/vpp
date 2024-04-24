@@ -17,7 +17,7 @@
  */
 
 #include <vppinfra/clib.h>
-#include <vnet/crypto/crypto.h>
+#include <plugins/crypto/crypto.h>
 #include <unittest/crypto/crypto.h>
 
 UNITTEST_REGISTER_CRYPTO_TEST (aes_gmac128_aad0_tc0) = {

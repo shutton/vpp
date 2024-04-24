@@ -24,7 +24,7 @@
 
 #include <vlib/vlib.h>
 #include <vnet/plugin/plugin.h>
-#include <vnet/crypto/crypto.h>
+#include <plugins/crypto/crypto.h>
 #include <vpp/app/version.h>
 #include <crypto_openssl/crypto_openssl.h>
 

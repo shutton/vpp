@@ -19,9 +19,10 @@
 #define __included_wg_noise_h__
 
 #include <vlib/vlib.h>
-#include <vnet/crypto/crypto.h>
+#include <plugins/crypto/crypto.h>
 #include <wireguard/blake/blake2s.h>
 #include <wireguard/wireguard_key.h>
+#include <vlib/unix/plugin.h>
 
 #define NOISE_PUBLIC_KEY_LEN	CURVE25519_KEY_SIZE
 #define NOISE_SYMMETRIC_KEY_LEN	  32	// CHACHA20POLY1305_KEY_SIZE
@@ -264,6 +265,7 @@ noise_remote_keypair_free (vlib_main_t *vm, noise_remote_t *r,
 {
   noise_local_t *local = noise_local_get (r->r_local_idx);
   struct noise_upcall *u = &local->l_upcall;
+  void (*vnet_crypto_key_del)(vlib_main_t *, vnet_crypto_key_index_t) = vlib_get_plugin_symbol ("crypto_plugin.so", "vnet_crypto_key_del");
   if (*kp)
     {
       u->u_index_drop (vm, (*kp)->kp_local_index);

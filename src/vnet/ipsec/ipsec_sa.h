@@ -17,7 +17,7 @@
 
 #include <vlib/vlib.h>
 #include <vppinfra/pcg.h>
-#include <vnet/crypto/crypto.h>
+#include <plugins/crypto/crypto.h>
 #include <vnet/ip/ip.h>
 #include <vnet/fib/fib_node.h>
 #include <vnet/tunnel/tunnel.h>

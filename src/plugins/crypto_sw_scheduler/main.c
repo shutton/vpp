@@ -258,6 +258,7 @@ process_ops (vlib_main_t * vm, vnet_crypto_async_frame_t * f,
   if (n_ops == 0)
     return;
 
+  vnet_crypto_process_ops_f vnet_crypto_process_ops = vlib_get_plugin_symbol ("crypto_plugin.so", "vnet_crypto_process_ops");
   n_fail = n_ops - vnet_crypto_process_ops (vm, op, n_ops);
 
   /*
@@ -290,6 +291,7 @@ process_chained_ops (vlib_main_t * vm, vnet_crypto_async_frame_t * f,
   if (n_ops == 0)
     return;
 
+  vnet_crypto_process_chained_ops_f vnet_crypto_process_chained_ops = vlib_get_plugin_symbol ("crypto_plugin.so", "vnet_crypto_process_chained_ops");
   n_fail = n_ops - vnet_crypto_process_chained_ops (vm, op, chunks, n_ops);
 
   /*

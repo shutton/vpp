@@ -23,12 +23,12 @@
 #include <vlibapi/api.h>
 #include <vlibmemory/api.h>
 
-#include <vnet/crypto/crypto.h>
+#include <plugins/crypto/crypto.h>
 
 /* define message IDs */
 #include <vnet/format_fns.h>
-#include <vnet/crypto/crypto.api_enum.h>
-#include <vnet/crypto/crypto.api_types.h>
+#include <plugins/crypto/crypto.api_enum.h>
+#include <plugins/crypto/crypto.api_types.h>
 
 /**
  * Base message ID fot the plugin
@@ -84,7 +84,7 @@ vl_api_crypto_set_handler_t_handler (vl_api_crypto_set_handler_t * mp)
   REPLY_MACRO (VL_API_CRYPTO_SET_HANDLER_REPLY);
 }
 
-#include <vnet/crypto/crypto.api.c>
+#include <plugins/crypto/crypto.api.c>
 
 clib_error_t *
 crypto_api_hookup (vlib_main_t * vm)

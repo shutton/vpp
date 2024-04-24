@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include <vnet/crypto/crypto.h>
+#include <plugins/crypto/crypto.h>
 
 #ifndef __crypto_sw_scheduler_h__
 #define __crypto_sw_scheduler_h__

@@ -26,7 +26,7 @@
 #include <vnet/ethernet/packet.h>
 
 #include <openssl/evp.h>
-#include <vnet/crypto/crypto.h>
+#include <plugins/crypto/crypto.h>
 
 #define MAX_VALUE_U24 0xffffff
 
@@ -2719,13 +2719,16 @@ update_map_register_auth_data (map_register_hdr_t * map_reg_hdr,
   op->digest_len = 0;
   op->iv = 0;
 
+  vnet_crypto_key_add_f vnet_crypto_key_add = vlib_get_plugin_symbol("crypto_plugin.so", "vnet_crypto_key_add");
   ki = vnet_crypto_key_add (lcm->vlib_main,
 			    lisp_key_type_to_crypto_alg (key_id), key,
 			    vec_len (key));
 
   op->key_index = ki;
 
+  vnet_crypto_process_ops_f vnet_crypto_process_ops = vlib_get_plugin_symbol ("crypto_plugin.so", "vnet_crypto_process_ops");
   vnet_crypto_process_ops (lcm->vlib_main, op, 1);
+  void (*vnet_crypto_key_del)(vlib_main_t *, vnet_crypto_key_index_t) = vlib_get_plugin_symbol ("crypto_plugin.so", "vnet_crypto_key_del");
   vnet_crypto_key_del (lcm->vlib_main, ki);
 
   return 0;
@@ -3905,13 +3908,16 @@ is_auth_data_valid (map_notify_hdr_t * h, u32 msg_len,
   op->digest_len = 0;
   op->iv = 0;
 
+  vnet_crypto_key_add_f vnet_crypto_key_add = vlib_get_plugin_symbol("crypto_plugin.so", "vnet_crypto_key_add");
   ki = vnet_crypto_key_add (lcm->vlib_main,
 			    lisp_key_type_to_crypto_alg (key_id), key,
 			    vec_len (key));
 
   op->key_index = ki;
 
+  vnet_crypto_process_ops_f vnet_crypto_process_ops = vlib_get_plugin_symbol ("crypto_plugin.so", "vnet_crypto_process_ops");
   vnet_crypto_process_ops (lcm->vlib_main, op, 1);
+  void (*vnet_crypto_key_del)(vlib_main_t *, vnet_crypto_key_index_t) = vlib_get_plugin_symbol ("crypto_plugin.so", "vnet_crypto_key_del");
   vnet_crypto_key_del (lcm->vlib_main, ki);
 
   result = memcmp (out, auth_data, auth_data_len);

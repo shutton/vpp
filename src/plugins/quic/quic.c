@@ -2568,7 +2568,7 @@ quic_init (vlib_main_t * vm)
 			      ptls_openssl_cipher_suites);
   qm->default_crypto_engine = CRYPTO_ENGINE_PICOTLS;
 
-  vnet_crypto_main_t *cm = &crypto_main;
+  vnet_crypto_main_t *cm = vlib_get_plugin_symbol ("crypto_plugin.so", "crypto_main");
   if (vec_len (cm->engines) == 0)
     qm->vnet_crypto_enabled = 0;
   else
@@ -2582,6 +2582,7 @@ quic_init (vlib_main_t * vm)
       vec_validate (qm->per_thread_crypto_key_indices, num_threads);
       for (i = 0; i < num_threads; i++)
 	{
+    vnet_crypto_key_add_f vnet_crypto_key_add = vlib_get_plugin_symbol("crypto_plugin.so", "vnet_crypto_key_add");
 	  qm->per_thread_crypto_key_indices[i] = vnet_crypto_key_add (
 	    vm, VNET_CRYPTO_ALG_AES_256_CTR, empty_key, 32);
 	}

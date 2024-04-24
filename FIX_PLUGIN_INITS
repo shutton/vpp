@@ -1,0 +1,10 @@
+src/plugins/crypto
+src/plugins/crypto_sw_scheduler
+src/plugins/dpdk/cryptodev
+src/plugins/lisp/lisp-cp
+src/plugins/quic
+src/plugins/tlspicotls
+src/plugins/unittest
+src/plugins/wireguard
+src/vnet/bfd
+src/vnet/ipsec

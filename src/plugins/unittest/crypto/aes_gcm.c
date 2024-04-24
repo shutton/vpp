@@ -16,7 +16,7 @@
 /* Test vectors published in GCM Specification */
 
 #include <vppinfra/clib.h>
-#include <vnet/crypto/crypto.h>
+#include <plugins/crypto/crypto.h>
 #include <unittest/crypto/crypto.h>
 
 static u8 tc1_key128[16] = { 0, };

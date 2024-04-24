@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include <vnet/crypto/crypto.h>
+#include <plugins/crypto/crypto.h>
 #include <vnet/tls/tls.h>
 #include <picotls/openssl.h>
 #include <picotls.h>
@@ -24,7 +24,7 @@
 typedef void (*ptls_vpp_do_transform_fn) (ptls_cipher_context_t *, void *,
 					  const void *, size_t);
 
-vnet_crypto_main_t *cm = &crypto_main;
+vnet_crypto_main_t *cm = vlib_get_plugin_symbol ("crypto_plugin.so", "crypto_main");
 extern picotls_main_t picotls_main;
 
 struct cipher_context_t
@@ -76,6 +76,7 @@ ptls_vpp_crypto_cipher_encrypt (ptls_cipher_context_t * _ctx, void *output,
   ctx->op.dst = output;
   ctx->op.len = _len;
 
+  vnet_crypto_process_ops_f vnet_crypto_process_ops = vlib_get_plugin_symbol ("crypto_plugin.so", "vnet_crypto_process_ops");
   vnet_crypto_process_ops (vm, &ctx->op, 1);
 }
 
@@ -113,6 +114,7 @@ ptls_vpp_crypto_cipher_setup_crypto (ptls_cipher_context_t * _ctx, int is_enc,
     }
 
   clib_rwlock_writer_lock (&picotls_main.crypto_keys_rw_lock);
+  vnet_crypto_key_add_f vnet_crypto_key_add = vlib_get_plugin_symbol("crypto_plugin.so", "vnet_crypto_key_add");
   ctx->key_index = vnet_crypto_key_add (vm, algo,
 					(u8 *) key, _ctx->algo->key_size);
   clib_rwlock_writer_unlock (&picotls_main.crypto_keys_rw_lock);
@@ -141,6 +143,7 @@ ptls_vpp_crypto_aead_decrypt (ptls_aead_context_t *_ctx, void *_output,
   ctx->op.tag_len = tag_size;
   ctx->op.tag = ctx->op.src + ctx->op.len;
 
+  vnet_crypto_process_ops_f vnet_crypto_process_ops = vlib_get_plugin_symbol ("crypto_plugin.so", "vnet_crypto_process_ops");
   vnet_crypto_process_ops (vm, &(ctx->op), 1);
   assert (ctx->op.status == VNET_CRYPTO_OP_STATUS_COMPLETED);
 
@@ -188,6 +191,7 @@ ptls_vpp_crypto_aead_encrypt_final (ptls_aead_context_t * _ctx, void *_output)
   ctx->op.tag = _output;
   ctx->op.tag_len = ctx->super.algo->tag_size;
 
+  vnet_crypto_process_chained_ops_f vnet_crypto_process_chained_ops = vlib_get_plugin_symbol("crypto_plugin.so", "vnet_crypto_process_chained_ops");
   vnet_crypto_process_chained_ops (vm, &(ctx->op), ctx->chunks, 1);
   assert (ctx->op.status == VNET_CRYPTO_OP_STATUS_COMPLETED);
 
@@ -201,6 +205,7 @@ ptls_vpp_crypto_aead_dispose_crypto (ptls_aead_context_t * _ctx)
   struct vpp_aead_context_t *ctx = (struct vpp_aead_context_t *) _ctx;
 
   clib_rwlock_writer_lock (&picotls_main.crypto_keys_rw_lock);
+  void (*vnet_crypto_key_del)(vlib_main_t *, vnet_crypto_key_index_t) = vlib_get_plugin_symbol ("crypto_plugin.so", "vnet_crypto_key_del");
   vnet_crypto_key_del (vm, ctx->key_index);
   clib_rwlock_writer_unlock (&picotls_main.crypto_keys_rw_lock);
 }
@@ -236,6 +241,7 @@ ptls_vpp_crypto_aead_setup_crypto (ptls_aead_context_t *_ctx, int is_enc,
   clib_memcpy (ctx->static_iv, iv, ctx->super.algo->iv_size);
 
   clib_rwlock_writer_lock (&picotls_main.crypto_keys_rw_lock);
+  vnet_crypto_key_add_f vnet_crypto_key_add = vlib_get_plugin_symbol("crypto_plugin.so", "vnet_crypto_key_add");
   ctx->key_index = vnet_crypto_key_add (vm, alg, (void *) key, key_len);
   clib_rwlock_writer_unlock (&picotls_main.crypto_keys_rw_lock);
 

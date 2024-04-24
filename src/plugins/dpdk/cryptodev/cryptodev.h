@@ -17,7 +17,7 @@
 #ifndef included_cryptodev_h
 #define included_cryptodev_h
 
-#include <vnet/crypto/crypto.h>
+#include <plugins/crypto/crypto.h>
 #undef always_inline
 #include <rte_cryptodev.h>
 

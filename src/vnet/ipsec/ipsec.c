@@ -95,6 +95,7 @@ ipsec_check_ah_support (ipsec_sa_t * sa)
   if (sa->integ_alg == IPSEC_INTEG_ALG_NONE)
     return clib_error_return (0, "unsupported none integ-alg");
 
+  vnet_crypto_is_set_handler_f vnet_crypto_is_set_handler = vlib_get_plugin_symbol ("crypto_plugin.so", "vnet_crypto_is_set_handler");
   if (!vnet_crypto_is_set_handler (im->integ_algs[sa->integ_alg].alg))
     return clib_error_return (0, "No crypto engine support for %U",
 			      format_ipsec_integ_alg, sa->integ_alg);
@@ -107,6 +108,7 @@ ipsec_check_esp_support (ipsec_sa_t * sa)
 {
   ipsec_main_t *im = &ipsec_main;
 
+  vnet_crypto_is_set_handler_f vnet_crypto_is_set_handler = vlib_get_plugin_symbol ("crypto_plugin.so", "vnet_crypto_is_set_handler");
   if (IPSEC_INTEG_ALG_NONE != sa->integ_alg)
     {
       if (!vnet_crypto_is_set_handler (im->integ_algs[sa->integ_alg].alg))
@@ -393,6 +395,7 @@ ipsec_set_async_mode (u32 is_enabled)
 static void
 crypto_engine_backend_register_post_node (vlib_main_t * vm)
 {
+  vnet_crypto_register_post_node_f vnet_crypto_register_post_node = vlib_get_plugin_symbol ("crypto_plugin.so", "vnet_crypto_register_post_node");
   esp_async_post_next_t *eit;
   esp_async_post_next_t *dit;
 

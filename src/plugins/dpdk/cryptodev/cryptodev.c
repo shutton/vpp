@@ -17,7 +17,7 @@
 
 #include <vlib/vlib.h>
 #include <vnet/plugin/plugin.h>
-#include <vnet/crypto/crypto.h>
+#include <plugins/crypto/crypto.h>
 #include <vnet/ipsec/ipsec.h>
 #include <vpp/app/version.h>
 

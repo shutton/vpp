@@ -17,7 +17,7 @@
 #define __included_wg_chachapoly_h__
 
 #include <vlib/vlib.h>
-#include <vnet/crypto/crypto.h>
+#include <plugins/crypto/crypto.h>
 
 #define XCHACHA20POLY1305_NONCE_SIZE 24
 #define CHACHA20POLY1305_KEY_SIZE    32

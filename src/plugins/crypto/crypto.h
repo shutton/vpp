@@ -428,7 +428,7 @@ void vnet_crypto_register_key_handler (vlib_main_t * vm, u32 engine_index,
 				       vnet_crypto_key_handler_t * keyh);
 
 /** async crypto register functions */
-u32 vnet_crypto_register_post_node (vlib_main_t * vm, char *post_node_name);
+typedef u32 (*vnet_crypto_register_post_node_f)(vlib_main_t * vm, char *post_node_name);
 
 void
 vnet_crypto_register_enqueue_handler (vlib_main_t *vm, u32 engine_index,
@@ -478,21 +478,29 @@ typedef struct
   u32 crypto_node_index;
 } vnet_crypto_main_t;
 
+// Other files include this, so this can't be externed as the symbol will be unresolved
+#ifdef CRYPTO_PLUGIN_INTERNAL
 extern vnet_crypto_main_t crypto_main;
 
-u32 vnet_crypto_process_chained_ops (vlib_main_t * vm, vnet_crypto_op_t ops[],
-				     vnet_crypto_op_chunk_t * chunks,
-				     u32 n_ops);
-u32 vnet_crypto_process_ops (vlib_main_t * vm, vnet_crypto_op_t ops[],
-			     u32 n_ops);
+inline vnet_crypto_main_t *get_crypto_main() {
+  return &crypto_main;
+}
+#else
+#include <vlib/unix/plugin.h>
+inline vnet_crypto_main_t *get_crypto_main() {
+  return (vnet_crypto_main_t *) vlib_get_plugin_symbol ("crypto_plugin.so", "crypto_main");
+}
+#endif
+
+typedef u32 (*vnet_crypto_process_chained_ops_f)(vlib_main_t *, vnet_crypto_op_t[], vnet_crypto_op_chunk_t *, u32);
+typedef u32 (*vnet_crypto_process_ops_f)(vlib_main_t *, vnet_crypto_op_t [], u32);
 
 void vnet_crypto_set_async_dispatch (u8 mode, u8 adaptive);
 int vnet_crypto_set_handler2 (char *ops_handler_name, char *engine,
 			      crypto_op_class_type_t oct);
-int vnet_crypto_is_set_handler (vnet_crypto_alg_t alg);
+typedef int (*vnet_crypto_is_set_handler_f)(vnet_crypto_alg_t alg);
 
-u32 vnet_crypto_key_add (vlib_main_t * vm, vnet_crypto_alg_t alg,
-			 u8 * data, u16 length);
+typedef u32 (*vnet_crypto_key_add_f)(vlib_main_t * , vnet_crypto_alg_t, u8 *, u16);
 void vnet_crypto_key_del (vlib_main_t * vm, vnet_crypto_key_index_t index);
 void vnet_crypto_key_update (vlib_main_t *vm, vnet_crypto_key_index_t index);
 
@@ -536,7 +544,7 @@ vnet_crypto_op_init (vnet_crypto_op_t * op, vnet_crypto_op_id_t type)
 static_always_inline vnet_crypto_op_type_t
 vnet_crypto_get_op_type (vnet_crypto_op_id_t id)
 {
-  vnet_crypto_main_t *cm = &crypto_main;
+  vnet_crypto_main_t *cm = get_crypto_main();
   ASSERT (id < VNET_CRYPTO_N_OP_IDS);
   vnet_crypto_op_data_t *od = cm->opt_data + id;
   return od->type;
@@ -545,7 +553,7 @@ vnet_crypto_get_op_type (vnet_crypto_op_id_t id)
 static_always_inline vnet_crypto_key_t *
 vnet_crypto_get_key (vnet_crypto_key_index_t index)
 {
-  vnet_crypto_main_t *cm = &crypto_main;
+  vnet_crypto_main_t *cm = get_crypto_main();
   return vec_elt_at_index (cm->keys, index);
 }
 
@@ -560,7 +568,7 @@ vnet_crypto_set_handler (char *alg_name, char *engine)
 static_always_inline vnet_crypto_async_frame_t *
 vnet_crypto_async_get_frame (vlib_main_t * vm, vnet_crypto_async_op_id_t opt)
 {
-  vnet_crypto_main_t *cm = &crypto_main;
+  vnet_crypto_main_t *cm = get_crypto_main();
   vnet_crypto_thread_t *ct = cm->threads + vm->thread_index;
   vnet_crypto_async_frame_t *f = NULL;
 
@@ -582,7 +590,7 @@ static_always_inline void
 vnet_crypto_async_free_frame (vlib_main_t * vm,
 			      vnet_crypto_async_frame_t * frame)
 {
-  vnet_crypto_main_t *cm = &crypto_main;
+  vnet_crypto_main_t *cm = get_crypto_main();
   vnet_crypto_thread_t *ct = cm->threads + vm->thread_index;
   pool_put (ct->frame_pool, frame);
 }
@@ -591,7 +599,7 @@ static_always_inline int
 vnet_crypto_async_submit_open_frame (vlib_main_t * vm,
 				     vnet_crypto_async_frame_t * frame)
 {
-  vnet_crypto_main_t *cm = &crypto_main;
+  vnet_crypto_main_t *cm = get_crypto_main();
   vlib_thread_main_t *tm = vlib_get_thread_main ();
   u32 i;
   vlib_node_t *n;

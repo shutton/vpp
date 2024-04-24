@@ -13,14 +13,16 @@
  * limitations under the License.
  */
 
+#define CRYPTO_PLUGIN_INTERNAL
+
 #include <stdbool.h>
 #include <vlib/vlib.h>
-#include <vnet/crypto/crypto.h>
+#include <plugins/crypto/crypto.h>
 
 vnet_crypto_main_t crypto_main;
 
 static_always_inline void
-crypto_set_op_status (vnet_crypto_op_t * ops[], u32 n_ops, int status)
+crypto_set_op_status(vnet_crypto_op_t * ops[], u32 n_ops, int status)
 {
   while (n_ops--)
     {

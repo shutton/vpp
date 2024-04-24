@@ -16,7 +16,7 @@
 #include <vppinfra/time.h>
 #include <vppinfra/cache.h>
 #include <vppinfra/error.h>
-#include <vnet/crypto/crypto.h>
+#include <plugins/crypto/crypto.h>
 #include <unittest/crypto/crypto.h>
 
 crypto_test_main_t crypto_test_main;
@@ -199,17 +199,19 @@ generate_digest (vlib_main_t * vm,
   op->len = r->plaintext_incremental;
   op->digest = r->digest.data;
   op->digest_len = r->digest.length;
+  vnet_crypto_key_add_f vnet_crypto_key_add = vlib_get_plugin_symbol("crypto_plugin.so", "vnet_crypto_key_add");
   op->key_index = vnet_crypto_key_add (vm, r->alg,
 				       cm->inc_data, r->key.length);
 
   /* at this point openssl is set for each algo */
+  vnet_crypto_process_ops_f vnet_crypto_process_ops = vlib_get_plugin_symbol ("crypto_plugin.so", "vnet_crypto_process_ops");
   vnet_crypto_process_ops (vm, op, 1);
 }
 
 static int
 restore_engines (u32 * engs)
 {
-  vnet_crypto_main_t *cm = &crypto_main;
+  vnet_crypto_main_t *cm = vlib_get_plugin_symbol ("crypto_plugin.so", "crypto_main");
   u32 i;
   vnet_crypto_engine_t *ce;
 
@@ -231,7 +233,7 @@ restore_engines (u32 * engs)
 static int
 save_current_engines (u32 * engs)
 {
-  vnet_crypto_main_t *cm = &crypto_main;
+  vnet_crypto_main_t *cm = vlib_get_plugin_symbol ("crypto_plugin.so", "crypto_main");
   uword *p;
   u32 i;
   vnet_crypto_engine_t *ce;
@@ -263,7 +265,7 @@ test_crypto_incremental (vlib_main_t * vm, crypto_test_main_t * tm,
 			 unittest_crypto_test_registration_t ** rv, u32 n_ops,
 			 u32 computed_data_total_len)
 {
-  vnet_crypto_main_t *cm = &crypto_main;
+  vnet_crypto_main_t *cm = vlib_get_plugin_symbol ("crypto_plugin.so", "crypto_main");
   vnet_crypto_alg_data_t *ad;
   vnet_crypto_key_index_t *key_indices = 0;
   u32 i;
@@ -296,6 +298,7 @@ test_crypto_incremental (vlib_main_t * vm, crypto_test_main_t * tm,
 	if (id == 0)
 	  continue;
 
+	vnet_crypto_key_add_f vnet_crypto_key_add = vlib_get_plugin_symbol("crypto_plugin.so", "vnet_crypto_key_add");
 	switch (t)
 	  {
 	  case VNET_CRYPTO_OP_TYPE_ENCRYPT:
@@ -342,6 +345,7 @@ test_crypto_incremental (vlib_main_t * vm, crypto_test_main_t * tm,
       }
   }
 
+  vnet_crypto_process_ops_f vnet_crypto_process_ops = vlib_get_plugin_symbol ("crypto_plugin.so", "vnet_crypto_process_ops");
   vnet_crypto_process_ops (vm, ops, n_ops);
   computed_data_total_len = 0;
 
@@ -350,6 +354,7 @@ test_crypto_incremental (vlib_main_t * vm, crypto_test_main_t * tm,
 
   vec_foreach_index (i, rv)
   {
+	vnet_crypto_key_add_f vnet_crypto_key_add = vlib_get_plugin_symbol("crypto_plugin.so", "vnet_crypto_key_add");
     r = rv[i];
     int t;
     ad = vec_elt_at_index (cm->algs, r->alg);
@@ -417,6 +422,7 @@ test_crypto_incremental (vlib_main_t * vm, crypto_test_main_t * tm,
   vnet_crypto_process_ops (vm, ops, n_ops);
   print_results (vm, rv, ops, 0, n_ops, tm);
 
+  void (*vnet_crypto_key_del)(vlib_main_t *, vnet_crypto_key_index_t) = vlib_get_plugin_symbol ("crypto_plugin.so", "vnet_crypto_key_del");
   vec_foreach_index (i, key_indices) vnet_crypto_key_del (vm, key_indices[i]);
   vec_free (tm->inc_data);
   vec_free (ops);
@@ -432,12 +438,13 @@ test_crypto_static (vlib_main_t * vm, crypto_test_main_t * tm,
 		    unittest_crypto_test_registration_t ** rv, u32 n_ops,
 		    u32 n_chained_ops, u32 computed_data_total_len)
 {
+  vnet_crypto_key_add_f vnet_crypto_key_add = vlib_get_plugin_symbol("crypto_plugin.so", "vnet_crypto_key_add");
   unittest_crypto_test_data_t *pt, *ct;
   vnet_crypto_op_chunk_t *chunks = 0, ch;
   unittest_crypto_test_registration_t *r;
   vnet_crypto_op_t *ops = 0, *op, *chained_ops = 0;
   vnet_crypto_op_t *current_chained_op = 0, *current_op = 0;
-  vnet_crypto_main_t *cm = &crypto_main;
+  vnet_crypto_main_t *cm = vlib_get_plugin_symbol ("crypto_plugin.so", "crypto_main");
   vnet_crypto_alg_data_t *ad;
   vnet_crypto_key_index_t *key_indices = 0;
   u8 *computed_data = 0;
@@ -644,13 +651,16 @@ test_crypto_static (vlib_main_t * vm, crypto_test_main_t * tm,
 	}
     }
 
+  vnet_crypto_process_ops_f vnet_crypto_process_ops = vlib_get_plugin_symbol ("crypto_plugin.so", "vnet_crypto_process_ops");
   vnet_crypto_process_ops (vm, ops, vec_len (ops));
+  vnet_crypto_process_chained_ops_f vnet_crypto_process_chained_ops = vlib_get_plugin_symbol("crypto_plugin.so", "vnet_crypto_process_chained_ops");
   vnet_crypto_process_chained_ops (vm, chained_ops, chunks,
 				   vec_len (chained_ops));
 
   print_results (vm, rv, ops, chunks, vec_len (ops), tm);
   print_results (vm, rv, chained_ops, chunks, vec_len (chained_ops), tm);
 
+  void (*vnet_crypto_key_del)(vlib_main_t *, vnet_crypto_key_index_t) = vlib_get_plugin_symbol ("crypto_plugin.so", "vnet_crypto_key_del");
   vec_foreach_index (i, key_indices) vnet_crypto_key_del (vm, key_indices[i]);
 
   vec_free (computed_data);
@@ -692,7 +702,7 @@ static clib_error_t *
 test_crypto (vlib_main_t * vm, crypto_test_main_t * tm)
 {
   clib_error_t *err = 0;
-  vnet_crypto_main_t *cm = &crypto_main;
+  vnet_crypto_main_t *cm = vlib_get_plugin_symbol ("crypto_plugin.so", "crypto_main");
   unittest_crypto_test_registration_t *r = tm->test_registrations;
   unittest_crypto_test_registration_t **static_tests = 0, **inc_tests = 0;
   u32 i, j, n_ops_static = 0, n_ops_incr = 0, n_chained_ops = 0;
@@ -845,7 +855,7 @@ done:
 static clib_error_t *
 test_crypto_perf (vlib_main_t * vm, crypto_test_main_t * tm)
 {
-  vnet_crypto_main_t *cm = &crypto_main;
+  vnet_crypto_main_t *cm = vlib_get_plugin_symbol ("crypto_plugin.so", "crypto_main");
   clib_error_t *err = 0;
   u32 n_buffers, n_alloc = 0, warmup_rounds, rounds;
   u32 *buffer_indices = 0;
@@ -894,6 +904,7 @@ test_crypto_perf (vlib_main_t * vm, crypto_test_main_t * tm)
   for (i = 0; i < sizeof (key); i++)
     key[i] = i;
 
+  vnet_crypto_key_add_f vnet_crypto_key_add = vlib_get_plugin_symbol("crypto_plugin.so", "vnet_crypto_key_add");
   key_index = vnet_crypto_key_add (vm, tm->alg, key,
 				   test_crypto_get_key_sz (tm->alg));
 
@@ -959,6 +970,7 @@ test_crypto_perf (vlib_main_t * vm, crypto_test_main_t * tm)
 	*(u64 *) (b->data + j) = 1 + random_u64 (&seed);
     }
 
+  vnet_crypto_process_ops_f vnet_crypto_process_ops = vlib_get_plugin_symbol ("crypto_plugin.so", "vnet_crypto_process_ops");
   for (i = 0; i < 5; i++)
     {
       for (j = 0; j < warmup_rounds; j++)
@@ -1006,8 +1018,10 @@ done:
   if (n_alloc)
     vlib_buffer_free (vm, buffer_indices, n_alloc);
 
-  if (key_index != ~0)
+  if (key_index != ~0) {
+	void (*vnet_crypto_key_del)(vlib_main_t *, vnet_crypto_key_index_t) = vlib_get_plugin_symbol ("crypto_plugin.so", "vnet_crypto_key_del");
     vnet_crypto_key_del (vm, key_index);
+  }
 
   vec_free (buffer_indices);
   vec_free (ops1);

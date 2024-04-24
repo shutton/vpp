@@ -25,7 +25,7 @@
 
 extern quic_main_t quic_main;
 extern quic_ctx_t *quic_get_conn_ctx (quicly_conn_t *conn);
-vnet_crypto_main_t *cm = &crypto_main;
+vnet_crypto_main_t *cm = vlib_get_plugin_symbol ("crypto_plugin.so", "crypto_main");
 
 typedef struct crypto_key_
 {
@@ -170,6 +170,7 @@ quic_crypto_aead_decrypt (quic_ctx_t *qctx, ptls_aead_context_t *_ctx,
   ctx->op.tag_len = ctx->super.algo->tag_size;
   ctx->op.tag = ctx->op.src + ctx->op.len;
 
+  vnet_crypto_process_ops_f vnet_crypto_process_ops = vlib_get_plugin_symbol ("crypto_plugin.so", "vnet_crypto_process_ops");
   vnet_crypto_process_ops (vm, &(ctx->op), 1);
 
   return ctx->op.len;
@@ -271,6 +272,7 @@ quic_crypto_encrypt_packet (struct st_quicly_crypto_engine_t *engine,
 			    int coalesced)
 {
   vlib_main_t *vm = vlib_get_main ();
+  vnet_crypto_process_ops_f vnet_crypto_process_ops = vlib_get_plugin_symbol ("crypto_plugin.so", "vnet_crypto_process_ops");
 
   struct cipher_context_t *hp_ctx =
     (struct cipher_context_t *) header_protect_ctx;

@@ -52,6 +52,7 @@ wg_chacha20poly1305_calc (vlib_main_t *vm, u8 *src, u32 src_len, u8 *dst,
   op->aad_len = aad_len;
   op->iv = iv;
 
+  vnet_crypto_process_ops_f vnet_crypto_process_ops = vlib_get_plugin_symbol ("crypto_plugin.so", "vnet_crypto_process_ops");
   vnet_crypto_process_ops (vm, op, 1);
   if (op_id == VNET_CRYPTO_OP_CHACHA20_POLY1305_ENC)
     {
@@ -80,6 +81,7 @@ wg_xchacha20poly1305_encrypt (vlib_main_t *vm, u8 *src, u32 src_len, u8 *dst,
 
   uint32_t key_idx;
 
+  vnet_crypto_key_add_f vnet_crypto_key_add = vlib_get_plugin_symbol("crypto_plugin.so", "vnet_crypto_key_add");
   key_idx =
     vnet_crypto_key_add (vm, VNET_CRYPTO_ALG_CHACHA20_POLY1305,
 			 (uint8_t *) derived_key, CHACHA20POLY1305_KEY_SIZE);
@@ -87,6 +89,7 @@ wg_xchacha20poly1305_encrypt (vlib_main_t *vm, u8 *src, u32 src_len, u8 *dst,
   wg_chacha20poly1305_calc (vm, src, src_len, dst, aad, aad_len, h_nonce,
 			    VNET_CRYPTO_OP_CHACHA20_POLY1305_ENC, key_idx);
 
+  void (*vnet_crypto_key_del)(vlib_main_t *, vnet_crypto_key_index_t) = vlib_get_plugin_symbol ("crypto_plugin.so", "vnet_crypto_key_del");
   vnet_crypto_key_del (vm, key_idx);
   wg_secure_zero_memory (derived_key, CHACHA20POLY1305_KEY_SIZE);
 }
@@ -110,6 +113,7 @@ wg_xchacha20poly1305_decrypt (vlib_main_t *vm, u8 *src, u32 src_len, u8 *dst,
 
   uint32_t key_idx;
 
+  vnet_crypto_key_add_f vnet_crypto_key_add = vlib_get_plugin_symbol("crypto_plugin.so", "vnet_crypto_key_add");
   key_idx =
     vnet_crypto_key_add (vm, VNET_CRYPTO_ALG_CHACHA20_POLY1305,
 			 (uint8_t *) derived_key, CHACHA20POLY1305_KEY_SIZE);
@@ -118,6 +122,7 @@ wg_xchacha20poly1305_decrypt (vlib_main_t *vm, u8 *src, u32 src_len, u8 *dst,
     wg_chacha20poly1305_calc (vm, src, src_len, dst, aad, aad_len, h_nonce,
 			      VNET_CRYPTO_OP_CHACHA20_POLY1305_DEC, key_idx);
 
+  void (*vnet_crypto_key_del)(vlib_main_t *, vnet_crypto_key_index_t) = vlib_get_plugin_symbol ("crypto_plugin.so", "vnet_crypto_key_del");
   vnet_crypto_key_del (vm, key_idx);
   wg_secure_zero_memory (derived_key, CHACHA20POLY1305_KEY_SIZE);
 

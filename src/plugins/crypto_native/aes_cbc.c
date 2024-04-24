@@ -17,12 +17,12 @@
 
 #include <vlib/vlib.h>
 #include <vnet/plugin/plugin.h>
-#include <vnet/crypto/crypto.h>
+#include <plugins/crypto/crypto.h>
 #include <crypto_native/crypto_native.h>
 #include <vppinfra/crypto/aes_cbc.h>
 
-#if __GNUC__ > 4  && !__clang__ && CLIB_DEBUG == 0
-#pragma GCC optimize ("O3")
+#if __GNUC__ > 4 && !__clang__ && CLIB_DEBUG == 0
+#pragma GCC optimize("O3")
 #endif
 
 #if defined(__VAES__) && defined(__AVX512F__)
@@ -46,15 +46,15 @@
 #endif
 
 static_always_inline u32
-aes_ops_enc_aes_cbc (vlib_main_t * vm, vnet_crypto_op_t * ops[],
-		     u32 n_ops, aes_key_size_t ks)
+aes_ops_enc_aes_cbc (vlib_main_t *vm, vnet_crypto_op_t *ops[], u32 n_ops,
+		     aes_key_size_t ks)
 {
   crypto_native_main_t *cm = &crypto_native_main;
   int rounds = AES_KEY_ROUNDS (ks);
   u8 placeholder[8192];
   u32 i, j, count, n_left = n_ops;
-  u32xN placeholder_mask = { };
-  u32xN len = { };
+  u32xN placeholder_mask = {};
+  u32xN len = {};
   vnet_crypto_key_index_t key_index[4 * N_AES_LANES];
   u8 *src[4 * N_AES_LANES] = {};
   u8 *dst[4 * N_AES_LANES] = {};
@@ -70,7 +70,8 @@ more:
       {
 	if (n_left == 0)
 	  {
-	    /* no more work to enqueue, so we are enqueueing placeholder buffer */
+	    /* no more work to enqueue, so we are enqueueing placeholder buffer
+	     */
 	    src[i] = dst[i] = placeholder;
 	    len[i] = sizeof (placeholder);
 	    placeholder_mask[i] = 0;
@@ -213,10 +214,9 @@ more:
   return n_ops;
 }
 
-
 static_always_inline u32
-aes_ops_dec_aes_cbc (vlib_main_t * vm, vnet_crypto_op_t * ops[],
-		     u32 n_ops, aes_key_size_t ks)
+aes_ops_dec_aes_cbc (vlib_main_t *vm, vnet_crypto_op_t *ops[], u32 n_ops,
+		     aes_key_size_t ks)
 {
   crypto_native_main_t *cm = &crypto_native_main;
   int rounds = AES_KEY_ROUNDS (ks);
@@ -249,15 +249,19 @@ decrypt:
   return n_ops;
 }
 
-#define foreach_aes_cbc_handler_type _(128) _(192) _(256)
+#define foreach_aes_cbc_handler_type _ (128) _ (192) _ (256)
 
-#define _(x) \
-static u32 aes_ops_dec_aes_cbc_##x \
-(vlib_main_t * vm, vnet_crypto_op_t * ops[], u32 n_ops) \
-{ return aes_ops_dec_aes_cbc (vm, ops, n_ops, AES_KEY_##x); } \
-static u32 aes_ops_enc_aes_cbc_##x \
-(vlib_main_t * vm, vnet_crypto_op_t * ops[], u32 n_ops) \
-{ return aes_ops_enc_aes_cbc (vm, ops, n_ops, AES_KEY_##x); } \
+#define _(x)                                                                  \
+  static u32 aes_ops_dec_aes_cbc_##x (vlib_main_t *vm,                        \
+				      vnet_crypto_op_t *ops[], u32 n_ops)     \
+  {                                                                           \
+    return aes_ops_dec_aes_cbc (vm, ops, n_ops, AES_KEY_##x);                 \
+  }                                                                           \
+  static u32 aes_ops_enc_aes_cbc_##x (vlib_main_t *vm,                        \
+				      vnet_crypto_op_t *ops[], u32 n_ops)     \
+  {                                                                           \
+    return aes_ops_enc_aes_cbc (vm, ops, n_ops, AES_KEY_##x);                 \
+  }
 
 foreach_aes_cbc_handler_type;
 #undef _
@@ -297,24 +301,24 @@ crypto_native_aes_cbc_init_icl (vlib_main_t *vm)
 #elif defined(__VAES__)
 crypto_native_aes_cbc_init_adl (vlib_main_t *vm)
 #elif __AVX512F__
-crypto_native_aes_cbc_init_skx (vlib_main_t * vm)
+crypto_native_aes_cbc_init_skx (vlib_main_t *vm)
 #elif __aarch64__
-crypto_native_aes_cbc_init_neon (vlib_main_t * vm)
+crypto_native_aes_cbc_init_neon (vlib_main_t *vm)
 #elif __AVX2__
-crypto_native_aes_cbc_init_hsw (vlib_main_t * vm)
+crypto_native_aes_cbc_init_hsw (vlib_main_t *vm)
 #else
-crypto_native_aes_cbc_init_slm (vlib_main_t * vm)
+crypto_native_aes_cbc_init_slm (vlib_main_t *vm)
 #endif
 {
   crypto_native_main_t *cm = &crypto_native_main;
 
-#define _(x) \
-  vnet_crypto_register_ops_handler (vm, cm->crypto_engine_index, \
-				    VNET_CRYPTO_OP_AES_##x##_CBC_ENC, \
-				    aes_ops_enc_aes_cbc_##x); \
-  vnet_crypto_register_ops_handler (vm, cm->crypto_engine_index, \
-				    VNET_CRYPTO_OP_AES_##x##_CBC_DEC, \
-				    aes_ops_dec_aes_cbc_##x); \
+#define _(x)                                                                  \
+  vnet_crypto_register_ops_handler (vm, cm->crypto_engine_index,              \
+				    VNET_CRYPTO_OP_AES_##x##_CBC_ENC,         \
+				    aes_ops_enc_aes_cbc_##x);                 \
+  vnet_crypto_register_ops_handler (vm, cm->crypto_engine_index,              \
+				    VNET_CRYPTO_OP_AES_##x##_CBC_DEC,         \
+				    aes_ops_dec_aes_cbc_##x);                 \
   cm->key_fn[VNET_CRYPTO_ALG_AES_##x##_CBC] = aes_cbc_key_exp_##x;
   foreach_aes_cbc_handler_type;
 #undef _

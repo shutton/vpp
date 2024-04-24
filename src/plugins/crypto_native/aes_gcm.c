@@ -17,7 +17,7 @@
 
 #include <vlib/vlib.h>
 #include <vnet/plugin/plugin.h>
-#include <vnet/crypto/crypto.h>
+#include <plugins/crypto/crypto.h>
 #include <crypto_native/crypto_native.h>
 #include <vppinfra/crypto/aes_gcm.h>
 

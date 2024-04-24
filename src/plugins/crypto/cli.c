@@ -13,9 +13,11 @@
  * limitations under the License.
  */
 
+#define CRYPTO_PLUGIN_INTERNAL
+
 #include <stdbool.h>
 #include <vlib/vlib.h>
-#include <vnet/crypto/crypto.h>
+#include <plugins/crypto/crypto.h>
 
 static clib_error_t *
 show_crypto_engines_command_fn (vlib_main_t * vm,

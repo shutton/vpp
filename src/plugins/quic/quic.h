@@ -24,7 +24,7 @@
 
 #include <quicly.h>
 
-#include <vnet/crypto/crypto.h>
+#include <plugins/crypto/crypto.h>
 #include <vppinfra/lock.h>
 
 /* QUIC log levels

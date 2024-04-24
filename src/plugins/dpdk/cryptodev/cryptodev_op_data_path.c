@@ -17,7 +17,7 @@
  */
 
 #include <vlib/vlib.h>
-#include <vnet/crypto/crypto.h>
+#include <plugins/crypto/crypto.h>
 
 #include <dpdk/buffer.h>
 #include <dpdk/device/dpdk.h>
@@ -566,7 +566,7 @@ cryptodev_frame_dequeue (vlib_main_t *vm, u32 *nb_elts_processed,
 			 u32 *enqueue_thread_idx)
 {
   cryptodev_main_t *cmt = &cryptodev_main;
-  vnet_crypto_main_t *cm = &crypto_main;
+  vnet_crypto_main_t *cm = vlib_get_plugin_symbol ("crypto_plugin.so", "crypto_main");
   cryptodev_engine_thread_t *cet = cmt->per_thread_data + vm->thread_index;
   cryptodev_cache_ring_t *ring = &cet->cache_ring;
   cryptodev_cache_ring_elt_t *ring_elt = &ring->frames[ring->tail];

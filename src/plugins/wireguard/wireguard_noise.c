@@ -128,6 +128,7 @@ noise_create_initiation (vlib_main_t * vm, noise_remote_t * r,
   uint8_t *key;
   int ret = false;
 
+  vnet_crypto_key_add_f vnet_crypto_key_add = vlib_get_plugin_symbol("crypto_plugin.so", "vnet_crypto_key_add");
   key_idx =
     vnet_crypto_key_add (vm, VNET_CRYPTO_ALG_CHACHA20_POLY1305, _key,
 			 NOISE_SYMMETRIC_KEY_LEN);
@@ -165,6 +166,7 @@ noise_create_initiation (vlib_main_t * vm, noise_remote_t * r,
   ret = true;
 error:
   wg_secure_zero_memory (key, NOISE_SYMMETRIC_KEY_LEN);
+  void (*vnet_crypto_key_del)(vlib_main_t *, vnet_crypto_key_index_t) = vlib_get_plugin_symbol ("crypto_plugin.so", "vnet_crypto_key_del");
   vnet_crypto_key_del (vm, key_idx);
   return ret;
 }
@@ -187,6 +189,7 @@ noise_consume_initiation (vlib_main_t * vm, noise_local_t * l,
   uint8_t *key;
   int ret = false;
 
+  vnet_crypto_key_add_f vnet_crypto_key_add = vlib_get_plugin_symbol("crypto_plugin.so", "vnet_crypto_key_add");
   key_idx =
     vnet_crypto_key_add (vm, VNET_CRYPTO_ALG_CHACHA20_POLY1305, _key,
 			 NOISE_SYMMETRIC_KEY_LEN);
@@ -250,6 +253,7 @@ noise_consume_initiation (vlib_main_t * vm, noise_local_t * l,
 
 error:
   wg_secure_zero_memory (key, NOISE_SYMMETRIC_KEY_LEN);
+  void (*vnet_crypto_key_del)(vlib_main_t *, vnet_crypto_key_index_t) = vlib_get_plugin_symbol ("crypto_plugin.so", "vnet_crypto_key_del");
   vnet_crypto_key_del (vm, key_idx);
   wg_secure_zero_memory (&hs, sizeof (hs));
   return ret;
@@ -267,6 +271,7 @@ noise_create_response (vlib_main_t * vm, noise_remote_t * r, uint32_t * s_idx,
   uint8_t *key;
   int ret = false;
 
+  vnet_crypto_key_add_f vnet_crypto_key_add = vlib_get_plugin_symbol("crypto_plugin.so", "vnet_crypto_key_add");
   key_idx =
     vnet_crypto_key_add (vm, VNET_CRYPTO_ALG_CHACHA20_POLY1305, _key,
 			 NOISE_SYMMETRIC_KEY_LEN);
@@ -304,6 +309,7 @@ noise_create_response (vlib_main_t * vm, noise_remote_t * r, uint32_t * s_idx,
   ret = true;
 error:
   wg_secure_zero_memory (key, NOISE_SYMMETRIC_KEY_LEN);
+  void (*vnet_crypto_key_del)(vlib_main_t *, vnet_crypto_key_index_t) = vlib_get_plugin_symbol ("crypto_plugin.so", "vnet_crypto_key_del");
   vnet_crypto_key_del (vm, key_idx);
   wg_secure_zero_memory (e, NOISE_PUBLIC_KEY_LEN);
   return ret;
@@ -322,6 +328,7 @@ noise_consume_response (vlib_main_t * vm, noise_remote_t * r, uint32_t s_idx,
   uint8_t *key;
   int ret = false;
 
+  vnet_crypto_key_add_f vnet_crypto_key_add = vlib_get_plugin_symbol("crypto_plugin.so", "vnet_crypto_key_add");
   key_idx =
     vnet_crypto_key_add (vm, VNET_CRYPTO_ALG_CHACHA20_POLY1305, _key,
 			 NOISE_SYMMETRIC_KEY_LEN);
@@ -367,6 +374,7 @@ noise_consume_response (vlib_main_t * vm, noise_remote_t * r, uint32_t s_idx,
 error:
   wg_secure_zero_memory (&hs, sizeof (hs));
   wg_secure_zero_memory (key, NOISE_SYMMETRIC_KEY_LEN);
+  void (*vnet_crypto_key_del)(vlib_main_t *, vnet_crypto_key_index_t) = vlib_get_plugin_symbol ("crypto_plugin.so", "vnet_crypto_key_del");
   vnet_crypto_key_del (vm, key_idx);
   return ret;
 }
@@ -400,6 +408,7 @@ noise_remote_begin_session (vlib_main_t * vm, noise_remote_t * r)
       return false;
     }
 
+  vnet_crypto_key_add_f vnet_crypto_key_add = vlib_get_plugin_symbol("crypto_plugin.so", "vnet_crypto_key_add");
   kp.kp_valid = 1;
   kp.kp_send_index = vnet_crypto_key_add (vm,
 					  VNET_CRYPTO_ALG_CHACHA20_POLY1305,

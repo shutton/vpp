@@ -16,7 +16,7 @@
 #define __IPSEC_H__
 
 #include <vnet/ip/ip.h>
-#include <vnet/crypto/crypto.h>
+#include <plugins/crypto/crypto.h>
 #include <vnet/feature/feature.h>
 
 #include <vppinfra/types.h>

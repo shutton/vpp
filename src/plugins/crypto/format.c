@@ -13,9 +13,11 @@
  * limitations under the License.
  */
 
+#define CRYPTO_PLUGIN_INTERNAL
+
 #include <stdbool.h>
 #include <vlib/vlib.h>
-#include <vnet/crypto/crypto.h>
+#include <plugins/crypto/crypto.h>
 
 u8 *
 format_vnet_crypto_alg (u8 * s, va_list * args)
