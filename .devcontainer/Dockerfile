@@ -3,6 +3,7 @@ COPY sysctl.80-vpp.conf /etc/sysctl.d/80-vpp.conf
 COPY profile.99-vpp-dev.sh /etc/profile.d/99-vpp-dev.sh
 RUN apt-get update
 RUN apt-get install -y \
+    ccache \
     chrpath \
     clang \
     cmake \
