@@ -1,27 +1,43 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
+// Podman help: https://medium.com/@guillem.riera/making-visual-studio-code-devcontainer-work-properly-on-rootless-podman-8d9ddc368b30
+// Recommended machine configuration: podman machine init --cpus=8 --memory=32768 -v $HOME:$HOME
 {
 	"name": "Ubuntu",
-	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	// "image": "mcr.microsoft.com/devcontainers/base:jammy",
-	// Features to add to the dev container. More info: https://containers.dev/features.
-	// "features": {},
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
-	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "uname -a",
-	// Configure tool-specific properties.
-	// "customizations": {},
-	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
-	// "remoteUser": "root"
+	// This is image you'd expect to use for VPP, but it doesn't exist for arm64
+	// (devcontainers is at 'jammy')
+	//
+	// "image": "mcr.microsoft.com/devcontainers/base:focal",
+
+	// Note that this isn't the only permission that's required. Some must be done by modifying the VM.
 	"capAdd": [
 		"NET_ADMIN"
 	],
+
 	"build": {
 		"dockerfile": "Dockerfile"
 	},
+
 	"privileged": true,
-	"postStartCommand": "cd ${containerWorkspaceFolder} && ./configure -b ${VPP_BUILD_DIR}",
+
+	// These settings have to be performed on the VM itself
+	"initializeCommand": "podman machine ssh 'sudo sysctl vm.nr_hugepages=512 vm.max_map_count=2048 kernel.shmmax=1073741824'",
+
+	"postStartCommand": "cd ${containerWorkspaceFolder} && UNATTENDED=yes make install-deps && ./configure",
+
+	// TODO: figure out how to mount build-root elsewhere?
+
+	// Try not to be root
+	"containerUser": "vscode",
+	"remoteUser": "vscode",
+	"runArgs": [
+		"--userns=keep-id:uid=1000,gid=1000"
+	],
+	"updateRemoteUserUID": true,
+	"containerEnv": {
+		"HOME": "/home/vscode"
+	},
+
 	"customizations": {
 		"vscode": {
 			"extensions": [
