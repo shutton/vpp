@@ -19,7 +19,7 @@
 
 #include <stdint.h>
 #include <vnet/vnet.h>
-#include <vnet/srv6/sr.h>
+#include <plugins/srv6/sr.h>
 #include <vlibmemory/api.h>
 
 #include <vnet/interface.h>
@@ -29,8 +29,8 @@
 #include <vnet/ip/ip_types_api.h>
 
 #include <vnet/format_fns.h>
-#include <vnet/srv6/sr.api_enum.h>
-#include <vnet/srv6/sr.api_types.h>
+#include <plugins/srv6/sr.api_enum.h>
+#include <plugins/srv6/sr.api_types.h>
 
 #include <srv6-mobile/mobile.h>
 #include <srv6-mobile/sr_mobile.api_types.h>

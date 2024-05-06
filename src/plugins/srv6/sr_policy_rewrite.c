@@ -40,14 +40,14 @@
 
 #include <vlib/vlib.h>
 #include <vnet/vnet.h>
-#include <vnet/srv6/sr.h>
+#include "sr.h"
 #include <vnet/ip/ip4_inlines.h>
 #include <vnet/ip/ip6_inlines.h>
-#include <vnet/srv6/sr_packet.h>
+#include "sr_packet.h"
 #include <vnet/fib/ip6_fib.h>
 #include <vnet/dpo/dpo.h>
 #include <vnet/dpo/replicate_dpo.h>
-#include <vnet/srv6/sr_pt.h>
+#include "sr_pt.h"
 
 #include <vppinfra/byte_order.h>
 #include <vppinfra/error.h>

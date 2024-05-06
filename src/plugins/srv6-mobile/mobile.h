@@ -22,8 +22,8 @@
 #include <vnet/ip/ip.h>
 #include <vnet/fib/ip4_fib.h>
 #include <vnet/fib/ip6_fib.h>
-#include <vnet/srv6/sr.h>
-#include <vnet/srv6/sr_packet.h>
+#include <plugins/srv6/sr.h>
+#include <plugins/srv6/sr_packet.h>
 
 #include <vppinfra/error.h>
 #include <vppinfra/elog.h>

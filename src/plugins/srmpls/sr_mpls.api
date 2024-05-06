@@ -17,7 +17,7 @@ option version = "3.0.0";
 
 import "vnet/interface_types.api";
 import "vnet/ip/ip_types.api";
-import "vnet/srv6/sr_types.api";
+import "plugins/srv6/sr_types.api";
 
 /** \brief MPLS SR policy add
     @param client_index - opaque cookie to identify the sender

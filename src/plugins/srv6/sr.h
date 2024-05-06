@@ -23,7 +23,7 @@
 #define included_vnet_srv6_h
 
 #include <vnet/vnet.h>
-#include <vnet/srv6/sr_packet.h>
+#include "sr_packet.h"
 #include <vnet/ip/ip6_packet.h>
 #include <vnet/ethernet/ethernet.h>
 

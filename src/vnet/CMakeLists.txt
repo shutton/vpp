@@ -786,33 +786,6 @@ list(APPEND VNET_HEADERS
 list(APPEND VNET_API_FILES vxlan-gpe/vxlan_gpe.api)
 
 ##############################################################################
-# ipv6 segment routing
-##############################################################################
-
-list(APPEND VNET_SOURCES
-  srv6/sr.c
-  srv6/sr_localsid.c
-  srv6/sr_policy_rewrite.c
-  srv6/sr_steering.c
-  srv6/sr_api.c
-  srv6/sr_pt.c
-  srv6/sr_pt_node.c
-  srv6/sr_pt_api.c
-)
-
-list(APPEND VNET_HEADERS
-  srv6/sr_packet.h
-  srv6/sr.h
-  srv6/sr_pt.h
-)
-
-list(APPEND VNET_API_FILES
-  srv6/sr.api
-  srv6/sr_types.api
-  srv6/sr_pt.api
-)
-
-##############################################################################
 # mpls segment routing
 ##############################################################################
 

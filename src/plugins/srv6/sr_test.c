@@ -26,11 +26,11 @@
 
 /* Declare message IDs */
 #include <vnet/format_fns.h>
-#include <vnet/srv6/sr.api_enum.h>
-#include <vnet/srv6/sr.api_types.h>
+#include "sr.api_enum.h"
+#include "sr.api_types.h"
 
 #define vl_endianfun /* define message structures */
-#include <vnet/srv6/sr.api.h>
+#include "sr.api.h"
 #undef vl_endianfun
 
 typedef struct
@@ -205,7 +205,7 @@ api_sr_localsid_add_del (vat_main_t *vam)
   return ret;
 }
 
-#include <vnet/srv6/sr.api_test.c>
+#include "sr.api_test.c"
 
 VAT_REGISTER_FEATURE_FUNCTION (vat_sr_plugin_register);
 

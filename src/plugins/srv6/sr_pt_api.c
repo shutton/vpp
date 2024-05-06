@@ -4,13 +4,13 @@
 
 #include <vnet/vnet.h>
 #include <vlibmemory/api.h>
-#include <vnet/srv6/sr_pt.h>
+#include "sr_pt.h"
 
 #include <vnet/interface.h>
 #include <vnet/api_errno.h>
 
-#include <vnet/srv6/sr_pt.api_enum.h>
-#include <vnet/srv6/sr_pt.api_types.h>
+#include "sr_pt.api_enum.h"
+#include "sr_pt.api_types.h"
 
 #define REPLY_MSG_ID_BASE sr_pt_main.msg_id_base
 #include <vlibapi/api_helper_macros.h>
@@ -82,7 +82,7 @@ vl_api_sr_pt_iface_del_t_handler (vl_api_sr_pt_iface_del_t *mp)
   REPLY_MACRO (VL_API_SR_PT_IFACE_DEL_REPLY);
 }
 
-#include <vnet/srv6/sr_pt.api.c>
+#include "sr_pt.api.c"
 static clib_error_t *
 sr_pt_api_hookup (vlib_main_t *vm)
 {

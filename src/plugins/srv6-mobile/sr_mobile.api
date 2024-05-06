@@ -17,8 +17,8 @@ option version = "0.1.0";
 
 import "vnet/interface_types.api";
 import "vnet/ip/ip_types.api";
-import "vnet/srv6/sr_types.api";
-import "vnet/srv6/sr.api";
+import "plugins/srv6/sr_types.api";
+import "plugins/srv6/sr.api";
 import "plugins/srv6-mobile/sr_mobile_types.api";
 
 /** \brief IPv6 SR for Mobile LocalSID add/del request

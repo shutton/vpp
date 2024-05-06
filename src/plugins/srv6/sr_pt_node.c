@@ -6,8 +6,8 @@
 #include <vnet/dpo/load_balance.h>
 #include <vnet/l2/feat_bitmap.h>
 #include <vnet/fib/fib_table.h>
-#include <vnet/srv6/sr.h>
-#include <vnet/srv6/sr_pt.h>
+#include "sr.h"
+#include "sr_pt.h"
 
 /**
  * @brief PT node trace

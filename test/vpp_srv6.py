@@ -10,7 +10,7 @@ import copy
 
 
 class SRv6LocalSIDBehaviors:
-    # from src/vnet/srv6/sr.h
+    # from src/plugins/srv6/sr.h
     SR_BEHAVIOR_END = 1
     SR_BEHAVIOR_X = 2
     SR_BEHAVIOR_T = 3
@@ -26,14 +26,14 @@ class SRv6LocalSIDBehaviors:
 
 
 class SRv6PolicyType:
-    # from src/vnet/srv6/sr.h
+    # from src/plugins/srv6/sr.h
     SR_POLICY_TYPE_DEFAULT = 0
     SR_POLICY_TYPE_SPRAY = 1
     SR_POLICY_TYPE_TEF = 2
 
 
 class SRv6PolicySteeringTypes:
-    # from src/vnet/srv6/sr.h
+    # from src/plugins/srv6/sr.h
     SR_STEER_L2 = 2
     SR_STEER_IPV4 = 4
     SR_STEER_IPV6 = 6

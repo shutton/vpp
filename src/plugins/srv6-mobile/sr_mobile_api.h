@@ -22,7 +22,7 @@
 #ifndef included_sr_mobile_api_h
 #define included_sr_mobile_api_h
 #include <stdint.h>
-#include <vnet/srv6/sr.h>
+#include <plugins/srv6/sr.h>
 #include <vnet/ip/ip_types_api.h>
 
 #define srv6_mobile_strcmp_with_size(s1, s1len, s2)                           \

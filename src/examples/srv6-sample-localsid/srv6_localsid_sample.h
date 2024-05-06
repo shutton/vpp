@@ -17,8 +17,8 @@
 
 #include <vnet/vnet.h>
 #include <vnet/ip/ip.h>
-#include <vnet/srv6/sr.h>
-#include <vnet/srv6/sr_packet.h>
+#include <plugins/srv6/sr.h>
+#include <plugins/srv6/sr_packet.h>
 
 #include <vppinfra/hash.h>
 #include <vppinfra/error.h>

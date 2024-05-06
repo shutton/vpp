@@ -18,7 +18,7 @@
  */
 
 #include <vnet/vnet.h>
-#include <vnet/srv6/sr.h>
+#include "sr.h"
 #include <vlibmemory/api.h>
 
 #include <vnet/interface.h>
@@ -28,8 +28,8 @@
 #include <vnet/ip/ip_types_api.h>
 
 #include <vnet/format_fns.h>
-#include <vnet/srv6/sr.api_enum.h>
-#include <vnet/srv6/sr.api_types.h>
+#include "sr.api_enum.h"
+#include "sr.api_types.h"
 
 #define REPLY_MSG_ID_BASE sr_main.msg_id_base
 #include <vlibapi/api_helper_macros.h>
@@ -630,7 +630,7 @@ static void vl_api_sr_steering_pol_dump_t_handler
   }
 }
 
-#include <vnet/srv6/sr.api.c>
+#include "sr.api.c"
 static clib_error_t *
 sr_api_hookup (vlib_main_t * vm)
 {
